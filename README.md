@@ -1,7 +1,5 @@
 # SkillSwap Connect Sphere
 
-![Hero Image](public/placeholder.svg) <!-- If there's a actual hero image, update this -->
-
 ## Description
 
 SkillSwap Connect Sphere is a peer-to-peer skill-sharing platform that connects learners and mentors worldwide. Users can exchange expertise by teaching skills they know and learning new ones in return. The platform facilitates skill swaps, mentor finding, and community-based learning in a supportive environment.
@@ -104,29 +102,3 @@ Available scripts:
 - **Frontend**: `npm run dev`, `npm run build`, `npm run lint`, `npm run preview`
 - **Backend**: `npm run dev`, `npm run seed`, `npm start`
 
-## Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. Fork the repository
-2. Create a new branch: `git checkout -b feature/your-feature`
-3. Make your changes and commit: `git commit -m 'Add some feature'`
-4. Push to the branch: `git push origin feature/your-feature`
-5. Submit a pull request
-
-Please ensure your code follows the project's coding standards and passes linting.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. (Note: If no LICENSE file exists, consider adding one.)
-
-## Acknowledgments
-
-- Built with [Vite](https://vitejs.dev/)
-- UI components from [Shadcn UI](https://ui.shadcn.com/)
-- Icons from [Lucide](https://lucide.dev/)
-- Inspired by peer-to-peer learning platforms
-
-For more details on creating README files, check out guides like [How To Create a README](https://github.com/NotesFromBritt/READMEhowto) and [How to write a README](https://github.com/amarpan/how-to-write-a-README).
-
-If you have questions, feel free to open an issue!
