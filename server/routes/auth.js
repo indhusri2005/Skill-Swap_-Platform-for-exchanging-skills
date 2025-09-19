@@ -7,6 +7,7 @@ const rateLimit = require('express-rate-limit');
 const User = require('../models/User');
 const { auth, authRateLimit } = require('../middleware/auth');
 const emailService = require('../services/emailService');
+const realTimeEvents = require('../utils/realTimeEvents');
 
 const router = express.Router();
 
@@ -88,6 +89,9 @@ router.post('/register', [
 
     await user.save();
 
+    // Emit real-time event for admin
+    realTimeEvents.userCreated(user);
+
     // Generate JWT token
     const token = generateToken(user._id);
 
@@ -109,6 +113,7 @@ router.post('/register', [
         lastName: user.lastName,
         email: user.email,
         avatar: user.getAvatarUrl(),
+        role: user.role,
         isVerified: user.isVerified,
         createdAt: user.createdAt,
         // Return empty profile state for new users
@@ -197,6 +202,7 @@ router.post('/login', [
         lastName: user.lastName,
         email: user.email,
         avatar: user.getAvatarUrl(),
+        role: user.role,
         isVerified: user.isVerified,
         lastActive: user.lastActive,
         stats: user.stats,
@@ -249,6 +255,9 @@ router.post('/verify-email', async (req, res) => {
     user.isVerified = true;
     user.verificationToken = undefined;
     await user.save();
+
+    // Emit real-time event for admin
+    realTimeEvents.userUpdated(user);
 
     res.json({
       success: true,
@@ -438,6 +447,7 @@ router.get('/me', auth, async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         avatar: user.getAvatarUrl(),
+        role: user.role,
         bio: user.bio,
         title: user.title,
         location: user.location,

@@ -487,6 +487,131 @@ class ApiService {
       body: JSON.stringify({ skillName, category }),
     });
   }
+
+  // Admin API methods
+  async getAdminDashboard() {
+    return this.request('/admin/dashboard');
+  }
+
+  async getAdminUsers(params?: { 
+    page?: number; 
+    limit?: number; 
+    search?: string; 
+    status?: string; 
+    role?: string;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.role) queryParams.append('role', params.role);
+
+    const endpoint = queryParams.toString() 
+      ? `/admin/users?${queryParams.toString()}`
+      : '/admin/users';
+    
+    return this.request(endpoint);
+  }
+
+  async getAdminUserById(id: string) {
+    return this.request(`/admin/users/${id}`);
+  }
+
+  async updateAdminUser(id: string, data: any) {
+    return this.request(`/admin/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getAdminSessions(params?: { 
+    page?: number; 
+    limit?: number; 
+    status?: string;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.status) queryParams.append('status', params.status);
+
+    const endpoint = queryParams.toString() 
+      ? `/admin/sessions?${queryParams.toString()}`
+      : '/admin/sessions';
+    
+    return this.request(endpoint);
+  }
+
+  async getAdminAnalytics() {
+    return this.request('/admin/analytics');
+  }
+
+  async sendAdminBroadcast(data: {
+    title: string;
+    message: string;
+    type?: string;
+    targetUsers?: string[];
+  }) {
+    return this.request('/admin/broadcast', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getAdminReports(params?: {
+    type?: string;
+    startDate?: string;
+    endDate?: string;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.type) queryParams.append('type', params.type);
+    if (params?.startDate) queryParams.append('startDate', params.startDate);
+    if (params?.endDate) queryParams.append('endDate', params.endDate);
+
+    const endpoint = queryParams.toString() 
+      ? `/admin/reports?${queryParams.toString()}`
+      : '/admin/reports';
+    
+    return this.request(endpoint);
+  }
+
+  // General HTTP methods for admin use
+  async get(endpoint: string, params?: Record<string, any>) {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+
+    const finalEndpoint = queryParams.toString() 
+      ? `${endpoint}?${queryParams.toString()}`
+      : endpoint;
+    
+    return this.request(finalEndpoint);
+  }
+
+  async post(endpoint: string, data?: any) {
+    return this.request(endpoint, {
+      method: 'POST',
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  }
+
+  async put(endpoint: string, data?: any) {
+    return this.request(endpoint, {
+      method: 'PUT',
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  }
+
+  async delete(endpoint: string) {
+    return this.request(endpoint, {
+      method: 'DELETE',
+    });
+  }
 }
 
 // Create a singleton instance

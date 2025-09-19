@@ -131,6 +131,20 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  role: {
+    type: String,
+    enum: ['user', 'admin', 'super_admin'],
+    default: 'user'
+  },
+  permissions: [{
+    type: String,
+    enum: ['manage_users', 'manage_skills', 'manage_sessions', 'view_analytics', 'manage_content', 'system_settings']
+  }],
+  adminNotes: {
+    type: String,
+    maxLength: 1000,
+    default: null
+  },
   notificationSettings: {
     email: {
       newMessage: { type: Boolean, default: true },

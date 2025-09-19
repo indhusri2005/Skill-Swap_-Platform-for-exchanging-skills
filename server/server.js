@@ -36,6 +36,7 @@ const sessionRoutes = require('./routes/sessions');
 const reviewRoutes = require('./routes/reviews');
 const notificationRoutes = require('./routes/notifications');
 const messageRoutes = require('./routes/messages');
+const adminRoutes = require('./routes/admin');
 
 // Import socket handlers
 const socketHandler = require('./sockets/socketHandler');
@@ -77,6 +78,7 @@ app.use('/api/sessions', sessionRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -84,7 +86,11 @@ app.get('/api/health', (req, res) => {
 });
 
 // Socket.IO connection handling
-socketHandler(io);
+const ioInstance = socketHandler(io);
+
+// Initialize real-time events with io instance
+const realTimeEvents = require('./utils/realTimeEvents');
+realTimeEvents.setIO(ioInstance);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -101,16 +107,24 @@ app.use('*', (req, res) => {
 });
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/skillswap', {
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/skillswap';
+
+mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
 .then(() => {
-  console.log('Connected to MongoDB');
+  console.log('✅ Connected to MongoDB');
+  console.log(`Database: ${MONGODB_URI}`);
 })
 .catch((err) => {
-  console.error('MongoDB connection error:', err);
-  process.exit(1);
+  console.error('❌ MongoDB connection error:', err);
+  console.log('\n🔧 To fix this issue:');
+  console.log('1. Install MongoDB locally, OR');
+  console.log('2. Use MongoDB Atlas (cloud), OR'); 
+  console.log('3. Use Docker: docker run -d -p 27017:27017 mongo');
+  console.log('\nFor now, starting server without database...');
+  // Don't exit, let server run for static files
 });
 
 const PORT = process.env.PORT || 5000;

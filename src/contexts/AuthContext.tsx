@@ -13,6 +13,7 @@ interface User {
   bio?: string;
   location?: string;
   isVerified: boolean;
+  role?: 'user' | 'admin' | 'super_admin';
   skillsOffered: Array<{
     name: string;
     level: string;
@@ -86,25 +87,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const checkAuthStatus = async () => {
     try {
       const token = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+      
       if (!token) {
         setLoading(false);
         return;
       }
 
       apiService.setToken(token);
+      
+      // If we have stored user data, use it immediately
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+        } catch (e) {
+          console.error('Error parsing stored user data:', e);
+        }
+      }
+      
+      // Then refresh user data from server
       const response = await apiService.getCurrentUser();
       
       if (response.success && response.data) {
-        setUser(response.data.user);
+        const updatedUser = response.data.user;
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
       } else {
-        // Invalid token, clear it
+        // Invalid token, clear everything
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
         apiService.setToken(null);
+        setUser(null);
       }
     } catch (error) {
       console.error('Auth check error:', error);
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       apiService.setToken(null);
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -118,6 +139,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const { token, user: userData } = response.data;
         
         apiService.setToken(token);
+        localStorage.setItem('user', JSON.stringify(userData));
         setUser(userData);
         socketService.connect(token);
 
@@ -126,10 +148,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           detail: { user: userData, timestamp: Date.now() }
         }));
 
-        toast({
-          title: "Welcome back!",
-          description: `Good to see you again, ${userData.firstName}!`,
-        });
+        // Check if user is admin and redirect to admin panel
+        if (userData.role && ['admin', 'super_admin'].includes(userData.role)) {
+          // Redirect to admin dashboard after a short delay
+          setTimeout(() => {
+            window.location.href = '/admin/dashboard';
+          }, 1500);
+          
+          toast({
+            title: "Welcome back, Admin!",
+            description: `Redirecting to admin panel...`,
+          });
+        } else {
+          toast({
+            title: "Welcome back!",
+            description: `Good to see you again, ${userData.firstName}!`,
+          });
+        }
 
         return true;
       } else {
@@ -164,6 +199,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const { token, user: newUser } = response.data;
         
         apiService.setToken(token);
+        localStorage.setItem('user', JSON.stringify(newUser));
         setUser(newUser);
         socketService.connect(token);
 
@@ -199,6 +235,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     apiService.setToken(null);
     socketService.disconnect();
     setUser(null);
@@ -214,7 +251,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await apiService.updateProfile(userData);
 
       if (response.success && response.data) {
-        setUser(response.data.user);
+        const updatedUser = response.data.user;
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
         
         toast({
           title: "Profile updated",
@@ -246,7 +285,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await apiService.getCurrentUser();
       
       if (response.success && response.data) {
-        setUser(response.data.user);
+        const updatedUser = response.data.user;
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
       }
     } catch (error) {
       console.error('Refresh user error:', error);

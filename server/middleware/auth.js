@@ -64,7 +64,7 @@ const requireVerification = (req, res, next) => {
   next();
 };
 
-// Middleware to check user roles (for future admin features)
+// Middleware to check user roles
 const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user.role || !roles.includes(req.user.role)) {
@@ -73,6 +73,42 @@ const authorize = (...roles) => {
         message: 'Not authorized to access this resource'
       });
     }
+    next();
+  };
+};
+
+// Middleware to check admin permissions
+const requireAdmin = (req, res, next) => {
+  if (!req.user.role || !['admin', 'super_admin'].includes(req.user.role)) {
+    return res.status(403).json({
+      success: false,
+      message: 'Admin access required'
+    });
+  }
+  next();
+};
+
+// Middleware to check specific permissions
+const requirePermission = (permission) => {
+  return (req, res, next) => {
+    if (!req.user.role || !['admin', 'super_admin'].includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Admin access required'
+      });
+    }
+    
+    if (req.user.role === 'super_admin') {
+      return next(); // Super admin has all permissions
+    }
+    
+    if (!req.user.permissions || !req.user.permissions.includes(permission)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Insufficient permissions'
+      });
+    }
+    
     next();
   };
 };
@@ -149,6 +185,8 @@ module.exports = {
   auth,
   requireVerification,
   authorize,
+  requireAdmin,
+  requirePermission,
   checkResourceOwnership,
   optionalAuth,
   authRateLimit

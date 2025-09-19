@@ -47,6 +47,12 @@ const socketHandler = (io) => {
     // Join user to their personal room for notifications
     socket.join(`user_${socket.user._id}`);
 
+    // Join admin users to admin room for real-time admin updates
+    if (socket.user.role && ['admin', 'super_admin'].includes(socket.user.role)) {
+      socket.join('admin_room');
+      console.log(`Admin ${socket.user.firstName} joined admin room`);
+    }
+
     // Update user's last active time
     socket.user.lastActive = new Date();
     socket.user.save().catch(console.error);
@@ -427,6 +433,15 @@ const socketHandler = (io) => {
 
   io.isUserOnline = (userId) => {
     return activeUsers.has(userId.toString());
+  };
+
+  // Admin-specific utilities
+  io.sendToAdmins = (event, data) => {
+    io.to('admin_room').emit(event, data);
+  };
+
+  io.broadcastAdminUpdate = (type, data) => {
+    io.to('admin_room').emit('admin_update', { type, data });
   };
 
   return io;
