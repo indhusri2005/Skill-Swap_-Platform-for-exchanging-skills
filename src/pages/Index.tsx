@@ -128,21 +128,21 @@ const Index = () => {
         ></div>
         
         <div className="relative container mx-auto px-4 text-center">
-          <Badge className="mb-6 bg-white/20 text-white border-white/30">
+          <Badge className="mb-6 bg-white/20 text-black border-white/30">
             🚀 Join 10,000+ learners already swapping skills
           </Badge>
           
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+          <h1 className="text-4xl md:text-6xl font-bold text-black mb-6 leading-tight">
             Learn Skills.
             <br />
-            <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-black to-black/80 bg-clip-text text-transparent">
               Teach Skills.
             </span>
             <br />
-            <span className="text-white/90">Grow Together.</span>
+            <span className="text-black">Grow Together.</span>
           </h1>
           
-          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-black mb-8 max-w-2xl mx-auto">
             Connect with passionate learners and mentors worldwide. Exchange your expertise 
             for new skills in a supportive peer-to-peer learning community.
           </p>
@@ -168,7 +168,7 @@ const Index = () => {
           </div>
           
           {/* Stats */}
-          <div className="flex flex-wrap justify-center gap-8 mt-12 text-white/90">
+          <div className="flex flex-wrap justify-center gap-8 mt-12 text-black">
             <div className="text-center">
               <div className="flex items-center gap-2 justify-center">
                 <Users className="h-5 w-5" />

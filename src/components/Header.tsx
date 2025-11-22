@@ -15,7 +15,6 @@ import apiService from "@/services/api";
 const Header = ({ hideSearch = false }) => {
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuth();
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
@@ -50,6 +49,7 @@ const Header = ({ hideSearch = false }) => {
   ];
 
   const authNavItems = [
+    { label: "Home", path: "/" },
     { label: "Find Mentors", path: "/find-mentors" },
     { label: "Browse Skills", path: "/browse-skills" },
     { label: "My Swaps", path: "/my-swaps" },
@@ -67,23 +67,10 @@ const Header = ({ hideSearch = false }) => {
           <span className="font-bold text-xl text-foreground">SkillSwap</span>
         </Link>
 
-        {/* Search Bar - Hidden on mobile */}
-        {!hideSearch && (
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input 
-                placeholder="Search skills, mentors, or topics..." 
-                className="pl-10 bg-muted/50"
-              />
-            </div>
-          </div>
-        )}
-
         {/* Navigation - Desktop */}
         <nav className="hidden md:flex items-center gap-4">
           {isAuthenticated ? (
-            authNavItems.slice(0, 3).map((item) => (
+            authNavItems.slice(0, 4).map((item) => (
               <Link key={item.path} to={item.path}>
                 <Button variant="ghost" size="sm">{item.label}</Button>
               </Link>
@@ -99,18 +86,6 @@ const Header = ({ hideSearch = false }) => {
 
         {/* User Actions */}
         <div className="flex items-center gap-2">
-          {/* Mobile Search */}
-          {!hideSearch && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="md:hidden"
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-            >
-              <Search className="h-5 w-5" />
-            </Button>
-          )}
-
           {isAuthenticated ? (
             // Authenticated User Actions
             <>
@@ -311,19 +286,6 @@ const Header = ({ hideSearch = false }) => {
         </div>
       </div>
       
-      {/* Mobile Search Bar */}
-      {isSearchOpen && !hideSearch && (
-        <div className="border-t bg-background p-4 md:hidden">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input 
-              placeholder="Search skills, mentors, or topics..." 
-              className="pl-10 bg-muted/50"
-              autoFocus
-            />
-          </div>
-        </div>
-      )}
       
       {/* Authentication Modal */}
       <AuthModal 

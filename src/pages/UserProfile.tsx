@@ -37,6 +37,18 @@ import apiService from "@/services/api";
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [isEditing, setIsEditing] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  
+  // Edit profile state
+  const [editForm, setEditForm] = useState({
+    firstName: '',
+    lastName: '',
+    title: '',
+    bio: '',
+    location: '',
+    linkedinUrl: '',
+    twitterHandle: ''
+  });
   
   // Skill management state
   const [showAddSkillModal, setShowAddSkillModal] = useState(false);
@@ -65,6 +77,16 @@ const UserProfile = () => {
     if (user) {
       setLocalSkillsOffered(user.skillsOffered || []);
       setLocalSkillsWanted(user.skillsWanted || []);
+      // Initialize edit form with current user data
+      setEditForm({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        title: user.title || '',
+        bio: user.bio || '',
+        location: user.location || '',
+        linkedinUrl: (user as any).socialLinks?.linkedin || '',
+        twitterHandle: (user as any).socialLinks?.twitter || ''
+      });
     }
   }, [user]);
 
@@ -196,6 +218,41 @@ const UserProfile = () => {
     }
   };
 
+  const handleSaveProfile = async () => {
+    try {
+      // Validate required fields
+      if (!editForm.firstName || !editForm.lastName) {
+        alert('Please fill in your first and last name');
+        return;
+      }
+
+      const profileData = {
+        firstName: editForm.firstName,
+        lastName: editForm.lastName,
+        title: editForm.title,
+        bio: editForm.bio,
+        location: editForm.location,
+        socialLinks: {
+          linkedin: editForm.linkedinUrl,
+          twitter: editForm.twitterHandle
+        }
+      };
+
+      const response = await apiService.updateProfile(profileData);
+
+      if (response.success) {
+        setShowEditModal(false);
+        await refreshUser();
+        alert('Profile updated successfully!');
+      } else {
+        alert('Failed to update profile: ' + (response.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Error updating profile: ' + (error as any).message);
+    }
+  };
+
   // Temporarily disable notifications query to isolate the issue
   // const { data: userNotifications } = useQuery({
   //   queryKey: ['user-notifications', user?.id],
@@ -299,16 +356,16 @@ const UserProfile = () => {
                 </Button>
               </div>
               
-              <div className="flex-1 text-white">
+              <div className="flex-1 text-black">
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h1 className="text-3xl md:text-4xl font-bold mb-2">
                       {user.firstName} {user.lastName}
                     </h1>
-                    <p className="text-xl text-white/90 mb-2">
+                    <p className="text-xl text-black/90 mb-2">
                       {user.title || "Skill Enthusiast"}
                     </p>
-                    <div className="flex items-center gap-4 text-white/80">
+                    <div className="flex items-center gap-4 text-black/80">
                       <div className="flex items-center gap-1">
                         <MapPin className="h-4 w-4" />
                         <span>{user.location || "Global"}</span>
@@ -323,38 +380,38 @@ const UserProfile = () => {
                   <div className="flex gap-2">
                     <Button 
                       variant="outline" 
-                      className="border-white/30 text-white hover:bg-white/10"
-                      onClick={() => setIsEditing(!isEditing)}
+                      className="border-black/30 text-black hover:bg-black/10"
+                      onClick={() => setShowEditModal(true)}
                     >
                       <Edit3 className="h-4 w-4 mr-2" />
                       Edit Profile
                     </Button>
                     <Button 
                       variant="outline" 
-                      className="border-white/30 text-white hover:bg-white/10"
+                      className="border-black/30 text-black hover:bg-black/10"
                     >
                       <Settings className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
                 
-                <p className="text-white/90 mb-4 max-w-2xl">
+                <p className="text-black/90 mb-4 max-w-2xl">
                   {user.bio || "Passionate about sharing and learning new skills."}
                 </p>
                 
                 <div className="flex gap-3">
-                  <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/10">
+                  <Button variant="outline" size="sm" className="border-black/30 text-black hover:bg-black/10">
                     <Globe className="h-4 w-4 mr-2" />
                     Portfolio
                   </Button>
                   {(user as any).socialLinks?.linkedin && (
-                    <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/10">
+                    <Button variant="outline" size="sm" className="border-black/30 text-black hover:bg-black/10">
                       <Linkedin className="h-4 w-4 mr-2" />
                       LinkedIn
                     </Button>
                   )}
                   {(user as any).socialLinks?.twitter && (
-                    <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/10">
+                    <Button variant="outline" size="sm" className="border-black/30 text-black hover:bg-black/10">
                       <Twitter className="h-4 w-4 mr-2" />
                       Twitter
                     </Button>
@@ -864,6 +921,94 @@ const UserProfile = () => {
             </Button>
             <Button onClick={handleAddGoal} disabled={!goalForm.name || !goalForm.level}>
               Add Goal
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Profile Modal */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="sm:max-w-[525px]">
+          <DialogHeader>
+            <DialogTitle>Edit Your Profile</DialogTitle>
+            <DialogDescription>
+              Update your personal information and professional details.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="first-name">First Name</Label>
+                <Input
+                  id="first-name"
+                  value={editForm.firstName}
+                  onChange={(e) => setEditForm(prev => ({...prev, firstName: e.target.value}))}
+                  placeholder="Your first name"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="last-name">Last Name</Label>
+                <Input
+                  id="last-name"
+                  value={editForm.lastName}
+                  onChange={(e) => setEditForm(prev => ({...prev, lastName: e.target.value}))}
+                  placeholder="Your last name"
+                />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="title">Professional Title</Label>
+              <Input
+                id="title"
+                value={editForm.title}
+                onChange={(e) => setEditForm(prev => ({...prev, title: e.target.value}))}
+                placeholder="e.g., Full Stack Developer, UI/UX Designer"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="bio">Bio</Label>
+              <Textarea
+                id="bio"
+                value={editForm.bio}
+                onChange={(e) => setEditForm(prev => ({...prev, bio: e.target.value}))}
+                placeholder="Tell us about yourself and your expertise"
+                className="min-h-[100px]"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="location">Location</Label>
+              <Input
+                id="location"
+                value={editForm.location}
+                onChange={(e) => setEditForm(prev => ({...prev, location: e.target.value}))}
+                placeholder="City, Country or Global"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="linkedin">LinkedIn URL</Label>
+              <Input
+                id="linkedin"
+                value={editForm.linkedinUrl}
+                onChange={(e) => setEditForm(prev => ({...prev, linkedinUrl: e.target.value}))}
+                placeholder="https://linkedin.com/in/yourprofile"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="twitter">Twitter Handle</Label>
+              <Input
+                id="twitter"
+                value={editForm.twitterHandle}
+                onChange={(e) => setEditForm(prev => ({...prev, twitterHandle: e.target.value}))}
+                placeholder="@yourhandle"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveProfile} disabled={!editForm.firstName || !editForm.lastName}>
+              Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -202,10 +202,10 @@ const FindMentors = () => {
       <section className="py-12 bg-gradient-hero">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-black mb-4">
               Find Your Perfect Mentor
             </h1>
-            <p className="text-xl text-white/90 max-w-2xl mx-auto">
+            <p className="text-xl text-black max-w-2xl mx-auto">
               Connect with experienced professionals ready to share their expertise and learn from you.
             </p>
           </div>

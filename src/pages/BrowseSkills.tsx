@@ -137,10 +137,10 @@ const BrowseSkills = () => {
       {/* Hero Section */}
       <section className="py-12 bg-gradient-hero">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-black mb-4">
             Discover New Skills
           </h1>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto mb-8">
+          <p className="text-xl text-black max-w-2xl mx-auto mb-8">
             Explore thousands of skills across diverse categories. Find your next learning adventure.
           </p>
           
