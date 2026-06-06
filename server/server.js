@@ -52,9 +52,12 @@ app.use(cors({
     "http://127.0.0.1:8080",
     "http://127.0.0.1:8081",
     "http://172.29.80.1:8080",
-    "http://172.29.80.1:8081"
+    "http://172.29.80.1:8081",
+    "https://skill-swap-platform-for-exchanging.vercel.app"
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Rate limiting
