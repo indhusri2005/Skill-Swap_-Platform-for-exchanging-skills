@@ -45,7 +45,8 @@ const socketHandler = require('./sockets/socketHandler');
 // Middleware
 app.use(helmet());
 app.use(morgan('combined'));
-app.use(cors({
+
+const corsOptions = {
   origin: [
     process.env.CLIENT_URL || "http://localhost:5173",
     "http://localhost:8080",
@@ -58,8 +59,13 @@ app.use(cors({
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 204,
+  preflightContinue: false
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // Rate limiting
 const limiter = rateLimit({
