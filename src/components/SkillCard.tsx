@@ -128,21 +128,23 @@ const SkillCard = ({
         }
       }
 
-      // First test the connection with a simple test endpoint
-      console.log('Testing connection first...');
-      const testData = {
-        recipientId: userId || mentorId || '',
-        skillOffered: userSkills,
-        skillWanted: swapData.skillWanted,
-        message: 'Test message'
-      };
-      
-      try {
-        const testResponse = await apiService.testSwapRequest(testData);
-        console.log('Connection test successful:', testResponse);
-      } catch (testError) {
-        console.error('Connection test failed:', testError);
-        throw new Error('Unable to connect to server. Please ensure the backend is running.');
+      // In development only: test the connection first to surface backend issues quickly.
+      // Skip the extra round-trip in production to reduce perceived latency.
+      if (import.meta.env.DEV) {
+        console.log('Testing connection first (dev only)...');
+        const testData = {
+          recipientId: userId || mentorId || '',
+          skillOffered: userSkills,
+          skillWanted: swapData.skillWanted,
+          message: 'Test message'
+        };
+        try {
+          const testResponse = await apiService.testSwapRequest(testData);
+          console.log('Connection test successful:', testResponse);
+        } catch (testError) {
+          console.error('Connection test failed:', testError);
+          throw new Error('Unable to connect to server. Please ensure the backend is running.');
+        }
       }
       
       // If test passes, proceed with real swap request
