@@ -46,21 +46,34 @@ const socketHandler = require('./sockets/socketHandler');
 app.use(helmet());
 app.use(morgan('combined'));
 
+const allowedOrigins = [
+  process.env.CLIENT_URL || "http://localhost:5173",
+  "http://localhost:8080",
+  "http://localhost:8081",
+  "http://127.0.0.1:8080",
+  "http://127.0.0.1:8081",
+  "http://172.29.80.1:8080",
+  "http://172.29.80.1:8081",
+  "https://skill-swap-platform-for-exchanging-six.vercel.app"
+];
+
 const corsOptions = {
-  origin: [
-    process.env.CLIENT_URL || "http://localhost:5173",
-    "http://localhost:8080",
-    "http://localhost:8081",
-    "http://127.0.0.1:8080",
-    "http://127.0.0.1:8081",
-    "http://172.29.80.1:8080",
-    "http://172.29.80.1:8081",
-    "https://skill-swap-platform-for-exchanging-six.vercel.app"
-  ],
+  origin: function (origin, callback) {
+    if (!origin) {
+      // Allow non-browser requests, local tools, etc.
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS policy does not allow access from origin ${origin}`));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  optionsSuccessStatus: 204,
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  optionsSuccessStatus: 200,
   preflightContinue: false
 };
 
