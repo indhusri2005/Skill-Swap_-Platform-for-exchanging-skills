@@ -124,7 +124,7 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-hero opacity-90"></div>
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
-          style={{ backgroundImage: `url(/hero-bg.jpg)` }}
+          style={{ backgroundImage: `url(/placeholder.svg)` }}
         ></div>
         
         <div className="relative container mx-auto px-4 text-center">
