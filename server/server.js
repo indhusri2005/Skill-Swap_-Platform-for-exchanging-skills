@@ -54,7 +54,7 @@ const allowedOrigins = [
   "http://127.0.0.1:8081",
   "http://172.29.80.1:8080",
   "http://172.29.80.1:8081",
-  "https://skill-swap-platform-for-exchanging-six.vercel.app"
+  "https://skill-swap-platform-for-exchanging.vercel.app"
 ];
 
 const corsOptions = {
