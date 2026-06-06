@@ -420,20 +420,7 @@ router.post('/swap-request', [
 
     await notification.save();
 
-    // Send email notification (optional)
-    try {
-      await emailService.sendSwapRequestEmail(recipient.email, {
-        requesterName: `${requester.firstName} ${requester.lastName}`,
-        skillOffered: skillsText,
-        skillWanted: skillWanted || 'Open to discussion',
-        message: sessionData.message,
-        actionUrl: `${process.env.CLIENT_BASE_URL}/my-swaps`
-      });
-    } catch (emailError) {
-      console.error('Failed to send email notification:', emailError);
-      // Don't fail the request if email fails
-    }
-
+    // Respond to the client first to avoid blocking on external services
     res.status(201).json({
       success: true,
       message: 'Swap request sent successfully',
@@ -442,6 +429,21 @@ router.post('/swap-request', [
         notificationId: notification._id
       }
     });
+
+    // Send email notification asynchronously (do not await) so the API is responsive.
+    (async () => {
+      try {
+        await emailService.sendSwapRequestEmail(recipient.email, {
+          requesterName: `${requester.firstName} ${requester.lastName}`,
+          skillOffered: skillsText,
+          skillWanted: skillWanted || 'Open to discussion',
+          message: sessionData.message,
+          actionUrl: `${process.env.CLIENT_BASE_URL}/my-swaps`
+        });
+      } catch (emailError) {
+        console.error('Failed to send email notification (async):', emailError);
+      }
+    })();
 
   } catch (error) {
     console.error('Create swap request error:', error);
