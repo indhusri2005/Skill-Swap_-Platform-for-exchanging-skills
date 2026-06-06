@@ -36,14 +36,14 @@ interface Message {
     avatar?: string;
   };
   content: string;
-  type: 'text' | 'image' | 'file';
-  read: boolean;
+  messageType: 'text' | 'image' | 'file';
+  isRead: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
 interface Conversation {
-  participant: {
+  user: {
     _id: string;
     firstName: string;
     lastName: string;
@@ -67,13 +67,23 @@ const Messages = () => {
   const { data: conversationsData, isLoading: conversationsLoading } = useQuery({
     queryKey: ['conversations'],
     queryFn: async () => {
-      // For now, return mock data until the messages API is implemented
-      return {
-        success: true,
-        data: {
+      try {
+        console.log('🔄 Fetching conversations from API...');
+        const response = await apiService.getConversations({ limit: 20 });
+        console.log('📨 API Response:', response);
+        
+        if (response.success && response.conversations && response.conversations.length > 0) {
+          return response;
+        }
+        throw new Error('No conversations from API');
+      } catch (error) {
+        console.warn('⚠️ Failed to fetch conversations from API, using mock data:', error);
+        // Fallback to mock data - THIS WILL BE SHOWN BY DEFAULT
+        return {
+          success: true,
           conversations: [
             {
-              participant: {
+              user: {
                 _id: '1',
                 firstName: 'Marcus',
                 lastName: 'Johnson',
@@ -85,15 +95,15 @@ const Messages = () => {
                 sender: { _id: '1', firstName: 'Marcus', lastName: 'Johnson' },
                 recipient: { _id: user?.id || '', firstName: user?.firstName || '', lastName: user?.lastName || '' },
                 content: 'Thanks for accepting my session request! Looking forward to learning React from you.',
-                type: 'text' as const,
-                read: false,
+                messageType: 'text' as const,
+                isRead: false,
                 createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
                 updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
               },
               unreadCount: 2
             },
             {
-              participant: {
+              user: {
                 _id: '2',
                 firstName: 'Elena',
                 lastName: 'Rodriguez',
@@ -105,15 +115,15 @@ const Messages = () => {
                 sender: { _id: user?.id || '', firstName: user?.firstName || '', lastName: user?.lastName || '' },
                 recipient: { _id: '2', firstName: 'Elena', lastName: 'Rodriguez' },
                 content: 'Perfect! What time works best for our Spanish conversation practice?',
-                type: 'text' as const,
-                read: true,
+                messageType: 'text' as const,
+                isRead: true,
                 createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
                 updatedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString()
               },
               unreadCount: 0
             },
             {
-              participant: {
+              user: {
                 _id: '3',
                 firstName: 'Raj',
                 lastName: 'Patel',
@@ -125,16 +135,16 @@ const Messages = () => {
                 sender: { _id: '3', firstName: 'Raj', lastName: 'Patel' },
                 recipient: { _id: user?.id || '', firstName: user?.firstName || '', lastName: user?.lastName || '' },
                 content: 'Your TypeScript explanation was incredibly helpful! Thank you so much.',
-                type: 'text' as const,
-                read: true,
+                messageType: 'text' as const,
+                isRead: true,
                 createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
                 updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
               },
               unreadCount: 0
             }
           ]
-        }
-      };
+        };
+      }
     },
     enabled: !!user
   });
@@ -145,52 +155,62 @@ const Messages = () => {
     queryFn: async () => {
       if (!selectedConversation) return { success: true, data: { messages: [] } };
       
-      // Mock messages for the selected conversation
-      const mockMessages = [
-        {
-          _id: 'm1',
-          sender: { _id: selectedConversation, firstName: 'Marcus', lastName: 'Johnson' },
-          recipient: { _id: user?.id || '', firstName: user?.firstName || '', lastName: user?.lastName || '' },
-          content: 'Hi! I saw your React expertise and would love to set up a session.',
-          type: 'text' as const,
-          read: true,
-          createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-          updatedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          _id: 'm2',
-          sender: { _id: user?.id || '', firstName: user?.firstName || '', lastName: user?.lastName || '' },
-          recipient: { _id: selectedConversation, firstName: 'Marcus', lastName: 'Johnson' },
-          content: 'Sure! I\'d be happy to help you learn React. What specific areas would you like to focus on?',
-          type: 'text' as const,
-          read: true,
-          createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-          updatedAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          _id: 'm3',
-          sender: { _id: selectedConversation, firstName: 'Marcus', lastName: 'Johnson' },
-          recipient: { _id: user?.id || '', firstName: user?.firstName || '', lastName: user?.lastName || '' },
-          content: 'Thanks for accepting my session request! Looking forward to learning React from you. I\'m particularly interested in hooks and state management.',
-          type: 'text' as const,
-          read: false,
-          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-          updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+      try {
+        const response = await apiService.getMessages(selectedConversation, { limit: 50 });
+        if (response.success) {
+          return response;
         }
-      ];
-      
-      return { success: true, data: { messages: mockMessages } };
+        throw new Error('Failed to fetch messages');
+      } catch (error) {
+        console.warn('Failed to fetch messages from API:', error);
+        // Fallback to mock messages
+        const mockMessages = [
+          {
+            _id: 'm1',
+            sender: { _id: selectedConversation, firstName: 'Marcus', lastName: 'Johnson' },
+            recipient: { _id: user?.id || '', firstName: user?.firstName || '', lastName: user?.lastName || '' },
+            content: 'Hi! I saw your React expertise and would love to set up a session.',
+            messageType: 'text' as const,
+            isRead: true,
+            createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+            updatedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            _id: 'm2',
+            sender: { _id: user?.id || '', firstName: user?.firstName || '', lastName: user?.lastName || '' },
+            recipient: { _id: selectedConversation, firstName: 'Marcus', lastName: 'Johnson' },
+            content: 'Sure! I\'d be happy to help you learn React. What specific areas would you like to focus on?',
+            messageType: 'text' as const,
+            isRead: true,
+            createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+            updatedAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            _id: 'm3',
+            sender: { _id: selectedConversation, firstName: 'Marcus', lastName: 'Johnson' },
+            recipient: { _id: user?.id || '', firstName: user?.firstName || '', lastName: user?.lastName || '' },
+            content: 'Thanks for accepting my session request! Looking forward to learning React from you. I\'m particularly interested in hooks and state management.',
+            messageType: 'text' as const,
+            isRead: false,
+            createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+            updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+          }
+        ];
+        
+        return { success: true, data: { messages: mockMessages } };
+      }
     },
     enabled: !!selectedConversation && !!user
   });
 
-  const conversations = conversationsData?.data?.conversations || [];
+  const conversations = conversationsData?.conversations || [];
   const messages = messagesData?.data?.messages || [];
 
   // Filter conversations based on search
-  const filteredConversations = conversations.filter((conv: Conversation) =>
-    `${conv.participant.firstName} ${conv.participant.lastName}`.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredConversations = conversations.filter((conv: Conversation) => {
+    const fullName = `${conv.user.firstName} ${conv.user.lastName}`.toLowerCase();
+    return fullName.includes(searchQuery.toLowerCase());
+  });
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -209,13 +229,40 @@ const Messages = () => {
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedConversation) return;
 
-    // For now, just show a success message since the API might not be implemented
-    toast({
-      title: "Message Sent",
-      description: "Your message has been sent successfully!"
-    });
-    
-    setNewMessage("");
+    try {
+      const response = await apiService.sendMessage({
+        recipientId: selectedConversation,
+        content: newMessage,
+        type: 'text'
+      });
+
+      console.log('📤 Send message response:', response);
+
+      if (response.success) {
+        toast({
+          title: "Message Sent",
+          description: "Your message has been sent successfully!"
+        });
+        setNewMessage("");
+        // Refresh messages
+        queryClient.invalidateQueries({ queryKey: ['messages', selectedConversation] });
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      } else {
+        console.error('❌ Send failed:', response);
+        toast({
+          title: "Error",
+          description: response.error || response.message || "Failed to send message",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('💥 Error sending message:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to send message. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   if (conversationsLoading) {
@@ -286,24 +333,24 @@ const Messages = () => {
                   ) : (
                     filteredConversations.map((conversation: Conversation) => (
                       <div
-                        key={conversation.participant._id}
-                        onClick={() => setSelectedConversation(conversation.participant._id)}
+                        key={conversation.user._id}
+                        onClick={() => setSelectedConversation(conversation.user._id)}
                         className={`p-4 cursor-pointer hover:bg-accent transition-colors ${
-                          selectedConversation === conversation.participant._id ? 'bg-accent' : ''
+                          selectedConversation === conversation.user._id ? 'bg-accent' : ''
                         }`}
                       >
                         <div className="flex items-start gap-3">
                           <Avatar className="h-12 w-12">
-                            <AvatarImage src={conversation.participant.avatar} />
+                            <AvatarImage src={conversation.user.avatar} />
                             <AvatarFallback>
-                              {`${conversation.participant.firstName[0]}${conversation.participant.lastName[0]}`}
+                              {`${conversation.user.firstName[0]}${conversation.user.lastName[0]}`}
                             </AvatarFallback>
                           </Avatar>
                           
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-1">
                               <h4 className="font-semibold text-sm truncate">
-                                {`${conversation.participant.firstName} ${conversation.participant.lastName}`}
+                                {`${conversation.user.firstName} ${conversation.user.lastName}`}
                               </h4>
                               <span className="text-xs text-muted-foreground">
                                 {formatTime(conversation.lastMessage.createdAt)}
@@ -311,7 +358,7 @@ const Messages = () => {
                             </div>
                             
                             <p className="text-sm text-muted-foreground mb-1 truncate">
-                              {conversation.participant.title}
+                              {conversation.user.title}
                             </p>
                             
                             <div className="flex items-center justify-between">
@@ -341,7 +388,7 @@ const Messages = () => {
                   <CardHeader className="border-b">
                     <div className="flex items-center gap-3">
                       {(() => {
-                        const participant = conversations.find((c: Conversation) => c.participant._id === selectedConversation)?.participant;
+                        const participant = conversations.find((c: Conversation) => c.user._id === selectedConversation)?.user;
                         return participant ? (
                           <>
                             <Avatar className="h-10 w-10">

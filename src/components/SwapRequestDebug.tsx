@@ -183,7 +183,7 @@ const SwapRequestDebug = () => {
         <div className="mt-6 p-4 bg-blue-50 rounded">
           <h4 className="font-semibold">Environment Info:</h4>
           <p>Frontend URL: {window.location.origin}</p>
-          <p>API Base URL: http://localhost:5000/api</p>
+          <p>API Base URL: {import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : 'http://localhost:5000/api'}</p>
           <p>User Agent: {navigator.userAgent}</p>
         </div>
       </CardContent>

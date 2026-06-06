@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import FindMentors from "./pages/FindMentors";
 import BrowseSkills from "./pages/BrowseSkills";
 import MySwaps from "./pages/MySwaps";
+import Messages from "./pages/Messages";
 import Notifications from "./pages/Notifications";
 import UserProfile from "./pages/UserProfile";
 import StartTeaching from "./pages/StartTeaching";
@@ -47,6 +48,11 @@ const App = () => (
               <Route path="/my-swaps" element={
                 <ProtectedRoute>
                   <MySwaps />
+                </ProtectedRoute>
+              } />
+              <Route path="/messages" element={
+                <ProtectedRoute>
+                  <Messages />
                 </ProtectedRoute>
               } />
               <Route path="/notifications" element={

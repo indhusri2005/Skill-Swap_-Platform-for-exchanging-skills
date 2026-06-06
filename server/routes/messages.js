@@ -138,11 +138,11 @@ router.get('/:userId', auth, async (req, res) => {
       {
         sender: otherUserId,
         recipient: currentUserId,
-        read: false
+        isRead: false
       },
       {
         $set: {
-          read: true,
+          isRead: true,
           readAt: new Date()
         }
       }
@@ -180,6 +180,8 @@ router.post('/', [
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.error('❌ Validation errors:', errors.array());
+      console.error('📝 Request body:', req.body);
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
@@ -212,9 +214,9 @@ router.post('/', [
       sender: senderId,
       recipient: recipientId,
       content,
-      type,
-      sessionId,
-      read: false
+      messageType: type,
+      relatedSession: sessionId,
+      isRead: false
     });
 
     await message.save();
@@ -278,7 +280,7 @@ router.put('/:id/read', auth, async (req, res) => {
     }
 
     // Mark as read
-    message.read = true;
+    message.isRead = true;
     message.readAt = new Date();
     await message.save();
 
@@ -308,11 +310,11 @@ router.put('/conversation/:userId/read-all', auth, async (req, res) => {
       {
         sender: otherUserId,
         recipient: currentUserId,
-        read: false
+        isRead: false
       },
       {
         $set: {
-          read: true,
+          isRead: true,
           readAt: new Date()
         }
       }
