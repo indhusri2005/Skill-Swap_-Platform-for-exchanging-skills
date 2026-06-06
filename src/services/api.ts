@@ -55,12 +55,26 @@ class ApiService {
       console.log(`API Response: ${response.status}`, data);
 
       if (!response.ok) {
+        // Build a more descriptive error message including validation errors when present
+        let errorMsg = data.message || `HTTP error! status: ${response.status}`;
+        if (data && data.errors && Array.isArray(data.errors) && data.errors.length) {
+          try {
+            const details = data.errors.map((e: any) => {
+              return e.msg + (e.param ? ` (field: ${e.param})` : '');
+            }).join('; ');
+            errorMsg = `${errorMsg}: ${details}`;
+          } catch (e) {
+            // ignore and keep original message
+          }
+        }
+
         // Handle authentication errors specifically
         if (response.status === 401) {
           console.warn('Authentication error - clearing token');
           this.setToken(null);
         }
-        throw new Error(data.message || `HTTP error! status: ${response.status}`);
+
+        throw new Error(errorMsg);
       }
 
       return {
