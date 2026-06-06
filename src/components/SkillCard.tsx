@@ -87,6 +87,17 @@ const SkillCard = ({
       return;
     }
 
+    // Ensure we have a recipient id to send the request to
+    if (!userId && !mentorId) {
+      console.error('No recipient id available for swap request', { userId, mentorId });
+      toast({
+        variant: "destructive",
+        title: "Recipient Missing",
+        description: "Unable to send swap request because the mentor's ID is missing. Please open the mentor's profile or use the Find Mentors page."
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       // Check if this is mock data (for demo purposes)
