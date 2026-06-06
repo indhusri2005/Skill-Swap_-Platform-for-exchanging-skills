@@ -91,7 +91,10 @@ const Index = () => {
       duration: "1-2 hours",
       avatar: "/placeholder.svg",
       description: "Senior Frontend Developer with 8+ years experience. Specializes in React ecosystem and modern JavaScript.",
-      tags: ["React", "TypeScript", "Next.js", "Testing"]
+      tags: ["React", "TypeScript", "Next.js", "Testing"],
+      userId: '507f1f77bcf86cd799439011',
+      mentorId: '507f1f77bcf86cd799439011',
+      availableSkills: ["React", "TypeScript", "Next.js", "Testing"]
     },
     {
       name: "Marcus Johnson",
@@ -101,7 +104,10 @@ const Index = () => {
       duration: "30-60 min",
       avatar: "/placeholder.svg",
       description: "Growth marketing expert who has helped startups scale from 0 to $10M+ revenue through digital strategies.",
-      tags: ["SEO", "PPC", "Analytics", "Growth"]
+      tags: ["SEO", "PPC", "Analytics", "Growth"],
+      userId: '507f1f77bcf86cd799439012',
+      mentorId: '507f1f77bcf86cd799439012',
+      availableSkills: ["SEO", "PPC", "Analytics", "Growth"]
     },
     {
       name: "Elena Rodriguez",
@@ -111,7 +117,10 @@ const Index = () => {
       duration: "45 min",
       avatar: "/placeholder.svg",
       description: "Native Spanish speaker and certified language teacher. Makes learning fun and practical.",
-      tags: ["Conversation", "Grammar", "Culture", "Business Spanish"]
+      tags: ["Conversation", "Grammar", "Culture", "Business Spanish"],
+      userId: '507f1f77bcf86cd799439013',
+      mentorId: '507f1f77bcf86cd799439013',
+      availableSkills: ["Conversation", "Grammar", "Culture", "Business Spanish"]
     }
   ];
 
