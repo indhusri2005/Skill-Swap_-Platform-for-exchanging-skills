@@ -352,11 +352,21 @@ const MySwaps = () => {
 
   const handleSubmitReview = () => {
     if (!selectedSession) return;
-    
+
+    const trimmedComment = reviewComment.trim();
+    if (trimmedComment.length < 10) {
+      toast({
+        variant: 'destructive',
+        title: 'Review too short',
+        description: 'Please provide at least 10 characters for your review.'
+      });
+      return;
+    }
+
     submitReviewMutation.mutate({
       sessionId: selectedSession._id,
       rating: reviewRating,
-      comment: reviewComment,
+      comment: trimmedComment,
       skillRating: skillRating,
       communicationRating: communicationRating,
       punctualityRating: punctualityRating
@@ -899,6 +909,11 @@ const MySwaps = () => {
                 onChange={(e) => setReviewComment(e.target.value)}
                 rows={4}
               />
+              <p className="text-xs text-muted-foreground">
+                {reviewComment.trim().length < 10
+                  ? `Enter at least ${10 - reviewComment.trim().length} more character${reviewComment.trim().length === 9 ? '' : 's'}.`
+                  : 'Your review is long enough to submit.'}
+              </p>
             </div>
             
             <div className="space-y-4">
@@ -987,7 +1002,7 @@ const MySwaps = () => {
             </Button>
             <Button 
               onClick={handleSubmitReview}
-              disabled={submitReviewMutation.isPending || !reviewComment.trim()}
+              disabled={submitReviewMutation.isPending || reviewComment.trim().length < 10}
             >
               {submitReviewMutation.isPending ? (
                 <>
